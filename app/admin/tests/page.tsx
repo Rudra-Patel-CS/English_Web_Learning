@@ -109,10 +109,46 @@ export default function AdminTestsPage() {
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file || !selectedTest) return
     setDocUploading(true)
+    
+    // First, upload to Supabase Storage
     const path = `tests/${selectedTest.id}/${Date.now()}_${file.name}`
     await supabase.storage.from('documents').upload(path, file)
     const { data: urlData } = supabase.storage.from('documents').getPublicUrl(path)
     if (urlData) await supabase.from('practice_tests').update({ file_url: urlData.publicUrl }).eq('id', selectedTest.id)
+
+    // Now, send to our API for parsing
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/parse-doc', { method: 'POST', body: formData })
+      const data = await res.json()
+      
+      if (data.questions && data.questions.length > 0) {
+        // Prepare questions for insertion
+        const nextNum = questions.length + 1
+        const payload = data.questions.map((q: any, i: number) => ({
+          test_id: selectedTest.id,
+          question_number: nextNum + i,
+          question_text: q.question_text,
+          option_a: q.option_a,
+          option_b: q.option_b,
+          option_c: q.option_c,
+          option_d: q.option_d,
+          correct_option: q.correct_option
+        }))
+        
+        await supabase.from('mcq_questions').insert(payload)
+        await supabase.from('practice_tests').update({ questions_count: questions.length + payload.length }).eq('id', selectedTest.id)
+        fetchQuestions(selectedTest.id)
+        alert(`Successfully imported ${payload.length} questions!`)
+      } else {
+        alert('File uploaded but no valid questions could be extracted. Please check the document format.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('File uploaded but failed to parse questions.')
+    }
+
     setDocUploading(false); setDocDialogOpen(false)
   }
 
@@ -230,11 +266,11 @@ export default function AdminTestsPage() {
                 <Dialog open={docDialogOpen} onOpenChange={setDocDialogOpen}>
                   <DialogTrigger asChild><Button variant="outline"><FileUp className="mr-2 h-4 w-4" />Upload Doc</Button></DialogTrigger>
                   <DialogContent>
-                    <DialogHeader><DialogTitle>Upload Document</DialogTitle><DialogDescription>Upload a document to attach to this test. (Auto question generation coming soon)</DialogDescription></DialogHeader>
+                    <DialogHeader><DialogTitle>Upload Document</DialogTitle><DialogDescription>Upload a document (PDF, DOCX, TXT) to automatically extract and add questions to this test. Please ensure questions are numbered and options are labeled A), B), C), D).</DialogDescription></DialogHeader>
                     <div className="pt-4 space-y-4">
                       <Input type="file" accept=".pdf,.doc,.docx,.txt" onChange={handleDocUpload} disabled={docUploading} />
-                      {docUploading && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Uploading...</div>}
-                      <p className="text-xs text-muted-foreground">Supported: PDF, DOC, DOCX, TXT. Auto question extraction will be available in a future update.</p>
+                      {docUploading && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Uploading and analyzing...</div>}
+                      <p className="text-xs text-muted-foreground">Supported: PDF, DOCX, TXT. Questions will be extracted and added below automatically.</p>
                     </div>
                   </DialogContent>
                 </Dialog>
