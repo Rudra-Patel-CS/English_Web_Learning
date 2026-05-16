@@ -137,6 +137,8 @@ export interface Query {
   answer?: string
   answered_by?: string
   answered_at?: string
+  student_image_url?: string
+  admin_image_url?: string
   created_at?: string
 }
 

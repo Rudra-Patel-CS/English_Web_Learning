@@ -24,8 +24,14 @@ export default function TakeTestPage({ params }: { params: Promise<{ id: string;
 
   useEffect(() => {
     const load = async () => {
-      const { data: t } = await supabase.from('practice_tests').select('*').eq('id', testId).single()
-      const { data: q } = await supabase.from('mcq_questions').select('*').eq('test_id', testId).order('question_number')
+      const [
+        { data: t },
+        { data: q }
+      ] = await Promise.all([
+        supabase.from('practice_tests').select('*').eq('id', testId).single(),
+        supabase.from('mcq_questions').select('*').eq('test_id', testId).order('question_number')
+      ])
+      
       if (t) { setTest(t); setTimeLeft((t.duration_minutes || 30) * 60) }
       if (q) setQuestions(q)
       setState('ready')

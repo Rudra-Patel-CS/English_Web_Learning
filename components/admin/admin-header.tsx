@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/auth-context'
+import Link from 'next/link'
 
 interface AdminHeaderProps {
   title: string
@@ -72,19 +73,23 @@ export function AdminHeader({ title, subtitle }: AdminHeaderProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
+            <DropdownMenuItem asChild>
+              <Link href="/admin/settings?tab=account">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
+            <DropdownMenuItem asChild>
+              <Link href="/admin/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-destructive"
-              onClick={() => {
-                logout()
+              onClick={async () => {
+                await logout()
                 window.location.href = '/'
               }}
             >

@@ -17,15 +17,23 @@ function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [mfaChallenge, setMfaChallenge] = useState<{ required: boolean; factorId?: string }>({ required: false })
+  const [mfaCode, setMfaCode] = useState('')
+  const [isVerifyingMfa, setIsVerifyingMfa] = useState(false)
 
   useEffect(() => {
+    let mounted = true
     if (user) {
-      if (user.role === 'admin') {
-        router.push('/admin')
-      } else {
-        router.push('/student')
-      }
+      setTimeout(() => {
+        if (!mounted) return
+        if (user.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/student')
+        }
+      }, 50)
     }
+    return () => { mounted = false }
   }, [user, router])
 
   // Login fields
@@ -44,13 +52,55 @@ function SignInForm() {
     setError('')
     const result = await login(loginEmail, loginPassword)
     if (result.success) {
-      setLoginEmail('')
-      setLoginPassword('')
-      if (result.role === 'admin') router.push('/admin')
-      else router.push('/student')
+      if (result.requireMfa && result.mfaFactorId) {
+        setMfaChallenge({ required: true, factorId: result.mfaFactorId })
+        setSuccess('Password accepted. Please enter your 2FA code.')
+      } else {
+        setLoginEmail('')
+        setLoginPassword('')
+        if (result.role === 'admin') router.push('/admin')
+        else router.push('/student')
+      }
     } else {
       setError(result.error || 'Invalid email or password')
     }
+  }
+
+  const handleMfaVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!mfaChallenge.factorId) return
+    
+    setError('')
+    setIsVerifyingMfa(true)
+    
+    // First we must challenge the factor to get a challengeId
+    const { supabase } = await import('@/lib/supabase')
+    const challengeRes = await supabase.auth.mfa.challenge({ factorId: mfaChallenge.factorId })
+    
+    if (challengeRes.error || !challengeRes.data) {
+      setError(challengeRes.error?.message || 'Failed to start 2FA challenge')
+      setIsVerifyingMfa(false)
+      return
+    }
+
+    const verifyRes = await supabase.auth.mfa.verify({
+      factorId: mfaChallenge.factorId,
+      challengeId: challengeRes.data.id,
+      code: mfaCode
+    })
+
+    if (verifyRes.error) {
+      setError('Invalid 2FA code. Please try again.')
+      setIsVerifyingMfa(false)
+      return
+    }
+
+    setSuccess('Verification successful! Redirecting...')
+    // We can assume user is now AAL2 verified. Since they are already signed in (AAL1), 
+    // the auth context will update naturally, but we should redirect based on their role.
+    const profileRes = await supabase.from('users').select('*').eq('id', verifyRes.data.user.id).single()
+    if (profileRes.data?.role === 'admin') router.push('/admin')
+    else router.push('/student')
   }
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -204,8 +254,39 @@ function SignInForm() {
             </div>
           )}
 
+          {/* MFA Verification Form */}
+          {mfaChallenge.required && (
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-1">Two-Factor Authentication</h2>
+              <p className="text-muted-foreground mb-6">Enter the 6-digit code from your authenticator app.</p>
+
+              <form onSubmit={handleMfaVerify} className="space-y-6" autoComplete="off">
+                <div className="space-y-3">
+                  <Label htmlFor="mfa-code" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Authenticator Code</Label>
+                  <Input 
+                    id="mfa-code" 
+                    type="text" 
+                    placeholder="e.g. 123456" 
+                    value={mfaCode} 
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                    required 
+                    autoComplete="one-time-code" 
+                    className="h-14 text-center text-2xl tracking-[0.25em] font-mono font-medium" 
+                    maxLength={6}
+                  />
+                </div>
+                <Button type="submit" className="w-full h-11" disabled={isVerifyingMfa || mfaCode.length !== 6}>
+                  {isVerifyingMfa ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : 'Verify Code'}
+                </Button>
+                <Button type="button" variant="ghost" className="w-full" onClick={() => { setMfaChallenge({ required: false }); setSuccess(''); setError(''); }}>
+                  Back to Login
+                </Button>
+              </form>
+            </div>
+          )}
+
           {/* Login Form */}
-          {activeTab === 'login' && (
+          {activeTab === 'login' && !mfaChallenge.required && (
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-1">Welcome back</h2>
               <p className="text-muted-foreground mb-6">Sign in to continue your learning journey.</p>

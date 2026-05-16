@@ -103,8 +103,8 @@ export function StudentHeader({ title, subtitle }: StudentHeaderProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-destructive focus:bg-destructive/10"
-                onSelect={() => {
-                  logout()
+                onSelect={async () => {
+                  await logout()
                   window.location.href = '/'
                 }}
               >

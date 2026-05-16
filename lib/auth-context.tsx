@@ -6,13 +6,18 @@ import { supabase } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<{ success: boolean; role?: UserRole; error?: string }>
+  login: (email: string, password: string) => Promise<{ success: boolean; role?: UserRole; requireMfa?: boolean; mfaFactorId?: string; error?: string }>
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>
   updateProfile: (data: { name?: string }) => Promise<{ success: boolean; error?: string }>
+  updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>
   updatePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   isLoading: boolean
+  enrollMfa: () => Promise<{ success: boolean; qrCodeUrl?: string; secret?: string; factorId?: string; error?: string }>
+  verifyMfa: (factorId: string, challengeId: string, code: string) => Promise<{ success: boolean; error?: string }>
+  challengeMfa: (factorId: string) => Promise<{ success: boolean; challengeId?: string; error?: string }>
+  unenrollMfa: (factorId: string) => Promise<{ success: boolean; error?: string }>
 }
 
 interface SignupData {
@@ -101,6 +106,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (data.user) {
+      // Check MFA requirement
+      const mfaFactors = await supabase.auth.mfa.listFactors()
+      const totpFactor = mfaFactors.data?.totp?.[0]
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      
+      const requireMfa = totpFactor?.status === 'verified' && aalData?.currentLevel === 'aal1' && aalData?.nextLevel === 'aal2'
+
       let profile = await fetchUserProfile(data.user.id)
       
       // If profile is missing (e.g. created in Supabase dashboard or previous signup failed), create it now
@@ -121,9 +133,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (profile) {
-        setUser(profile)
+        if (!requireMfa) {
+          setUser(profile)
+        }
         setIsLoading(false)
-        return { success: true, role: profile.role }
+        return { 
+          success: true, 
+          role: profile.role, 
+          requireMfa, 
+          mfaFactorId: requireMfa ? totpFactor?.id : undefined 
+        }
       }
     }
 
@@ -199,10 +218,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true }
   }
 
+  const updateEmail = async (newEmail: string): Promise<{ success: boolean; error?: string; pending?: boolean }> => {
+    if (!user) return { success: false, error: 'Not authenticated' }
+
+    // Update in Supabase Auth
+    const { data, error: authError } = await supabase.auth.updateUser({ email: newEmail })
+    if (authError) return { success: false, error: authError.message }
+
+    // If Supabase requires email confirmation, it sets `new_email` but keeps the old `email`.
+    if (data?.user?.new_email && data.user.email !== newEmail.toLowerCase()) {
+      return { success: true, pending: true }
+    }
+
+    // If no confirmation is required (changed immediately), update the public users table
+    const { error: dbError } = await supabase
+      .from('users')
+      .update({ email: newEmail.toLowerCase(), updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+
+    if (dbError) return { success: false, error: dbError.message }
+
+    setUser(prev => prev ? { ...prev, email: newEmail.toLowerCase() } : null)
+    return { success: true, pending: false }
+  }
+
   const updatePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'Not authenticated' }
 
-    // First verify current password by re-signing in
+    // First verify current password by re-signing in (Legacy check, kept for older GoTrue versions)
     const { error: verifyError } = await supabase.auth.signInWithPassword({
       email: user.email,
       password: currentPassword,
@@ -215,7 +258,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Update password
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
-    })
+      current_password: currentPassword, // Required for newer Supabase projects
+    } as any)
 
     if (error) return { success: false, error: error.message }
 
@@ -227,8 +271,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const enrollMfa = async () => {
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+    if (error) return { success: false, error: error.message }
+    return { 
+      success: true, 
+      qrCodeUrl: data.totp.qr_code, 
+      secret: data.totp.secret,
+      factorId: data.id 
+    }
+  }
+
+  const challengeMfa = async (factorId: string) => {
+    const { data, error } = await supabase.auth.mfa.challenge({ factorId })
+    if (error) return { success: false, error: error.message }
+    return { success: true, challengeId: data.id }
+  }
+
+  const verifyMfa = async (factorId: string, challengeId: string, code: string) => {
+    const { data, error } = await supabase.auth.mfa.verify({ factorId, challengeId, code })
+    if (error) return { success: false, error: error.message }
+    
+    // User is now aal2 verified, we can set them in context if needed
+    if (data.user) {
+       const profile = await fetchUserProfile(data.user.id)
+       if (profile) setUser(profile)
+    }
+    
+    return { success: true }
+  }
+
+  const unenrollMfa = async (factorId: string) => {
+    const { error } = await supabase.auth.mfa.unenroll({ factorId })
+    if (error) return { success: false, error: error.message }
+    return { success: true }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, signInWithGoogle, updateProfile, updatePassword, logout, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, login, signup, signInWithGoogle, 
+      updateProfile, updateEmail, updatePassword, logout, isLoading,
+      enrollMfa, verifyMfa, challengeMfa, unenrollMfa
+    }}>
       {children}
     </AuthContext.Provider>
   )

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { StudentHeader } from '@/components/student/student-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, BookOpen, ExternalLink, Loader2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, ExternalLink, Download, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { TextBook } from '@/lib/types'
 
@@ -64,12 +64,20 @@ export default function StudentTextbooksPage({ params }: { params: Promise<{ id:
                   {book.author && <p className="text-sm text-muted-foreground mb-1">By {book.author}</p>}
                   {book.chapter && <p className="text-xs text-muted-foreground mb-3">Chapter: {book.chapter}</p>}
                   {book.description && <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{book.description}</p>}
-                  <Button asChild className="w-full" variant="outline">
-                    <a href={book.file_url} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Open Textbook
-                    </a>
-                  </Button>
+                  <div className="flex gap-2 mt-2">
+                    <Button asChild className="flex-1" variant="outline">
+                      <a href={book.file_url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Read
+                      </a>
+                    </Button>
+                    <Button asChild className="flex-1">
+                      <a href={book.file_url?.includes('supabase.co') ? `${book.file_url}?download=` : book.file_url} target="_blank" rel="noopener noreferrer" download>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download
+                      </a>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}

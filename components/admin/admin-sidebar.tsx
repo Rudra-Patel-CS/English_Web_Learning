@@ -15,6 +15,7 @@ import {
   PenTool,
   ClipboardList,
   HelpCircle,
+  Settings,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
@@ -28,6 +29,7 @@ const menuItems = [
   { icon: PenTool, label: 'Practice Tests', href: '/admin/tests' },
   { icon: ClipboardList, label: 'Generate Paper', href: '/admin/generate-paper' },
   { icon: HelpCircle, label: 'Student Queries', href: '/admin/queries' },
+  { icon: Settings, label: 'Settings', href: '/admin/settings' },
 ]
 
 export function AdminSidebar() {
