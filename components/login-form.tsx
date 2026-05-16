@@ -56,27 +56,27 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background p-2 sm:p-4">
+      <div className="w-full max-w-md mx-auto">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <GraduationCap className="h-7 w-7 text-primary-foreground" />
+        <div className="flex items-center justify-center gap-3 mb-6 sm:mb-8">
+          <div className="flex h-10 sm:h-12 w-10 sm:w-12 items-center justify-center rounded-xl bg-primary shrink-0">
+            <GraduationCap className="h-6 sm:h-7 w-6 sm:w-7 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold text-foreground">EduPaper</span>
+          <span className="text-xl sm:text-2xl font-bold text-foreground break-words">EduPaper</span>
         </div>
 
         <Card className="border-border/50 shadow-xl">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>
+          <CardHeader className="text-center pb-3 sm:pb-4">
+            <CardTitle className="text-xl sm:text-2xl">Welcome Back</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Sign in to access your learning dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -84,12 +84,12 @@ export function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11"
+                  className="h-10 sm:h-11 text-base"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -98,12 +98,12 @@ export function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-11 pr-10"
+                    className="h-10 sm:h-11 pr-10 text-base"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -111,10 +111,10 @@ export function LoginForm() {
               </div>
 
               {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
+                <p className="text-xs sm:text-sm text-destructive text-center">{error}</p>
               )}
 
-              <Button type="submit" className="w-full h-11" disabled={isLoading}>
+              <Button type="submit" className="w-full h-10 sm:h-11 text-sm" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -127,8 +127,8 @@ export function LoginForm() {
             </form>
 
             {/* Demo Accounts */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground text-center mb-4">
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mb-3 sm:mb-4">
                 Try a demo account
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -137,37 +137,37 @@ export function LoginForm() {
                   size="sm"
                   onClick={() => handleDemoLogin('admin')}
                   disabled={isLoading}
-                  className="flex flex-col h-auto py-3 gap-1"
+                  className="flex flex-col h-auto py-2 sm:py-3 gap-1 text-xs"
                 >
                   <Users className="h-4 w-4" />
-                  <span className="text-xs">Admin</span>
+                  <span>Admin</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleDemoLogin('teacher')}
                   disabled={isLoading}
-                  className="flex flex-col h-auto py-3 gap-1"
+                  className="flex flex-col h-auto py-2 sm:py-3 gap-1 text-xs"
                 >
                   <BookOpen className="h-4 w-4" />
-                  <span className="text-xs">Teacher</span>
+                  <span>Teacher</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleDemoLogin('student')}
                   disabled={isLoading}
-                  className="flex flex-col h-auto py-3 gap-1"
+                  className="flex flex-col h-auto py-2 sm:py-3 gap-1 text-xs"
                 >
                   <GraduationCap className="h-4 w-4" />
-                  <span className="text-xs">Student</span>
+                  <span>Student</span>
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-6 px-2">
           Educational platform for teachers and students
         </p>
       </div>

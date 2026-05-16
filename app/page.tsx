@@ -19,7 +19,7 @@ export default function HomePage() {
       
       <main className="flex-1">
         {/* Hero Section with 3D Elements */}
-        <section className="relative py-20 md:py-32 overflow-hidden animated-gradient-bg">
+        <section className="relative py-12 sm:py-20 md:py-32 overflow-hidden animated-gradient-bg">
           {/* Floating 3D Decorative Elements */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {/* Floating Pencil */}
@@ -64,11 +64,11 @@ export default function HomePage() {
                 <Sparkles className="h-4 w-4" />
                 <span>English Learning Platform for Standards 6-12</span>
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-foreground leading-tight text-balance mb-6 animate-slide-up delay-100">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-foreground leading-tight text-balance mb-4 sm:mb-6 animate-slide-up delay-100">
                 Master English with{' '}
                 <span className="gradient-text">EnglishMaster</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 text-pretty animate-slide-up delay-200 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 sm:mb-10 text-pretty animate-slide-up delay-200 max-w-2xl mx-auto">
                 Access comprehensive study materials, video tutorials, reading resources, and practice tests designed to help you excel in English across all academic standards.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up delay-300">
@@ -87,9 +87,9 @@ export default function HomePage() {
         </section>
 
         {/* Features Section with 3D Cards */}
-        <section className="py-20 bg-background">
+        <section className="py-12 sm:py-20 bg-background">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center mb-14">
+            <div className="text-center mb-8 sm:mb-14">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
                 Everything You Need to <span className="gradient-text">Master English</span>
               </h2>
@@ -97,19 +97,19 @@ export default function HomePage() {
                 Four pillars of learning designed to help you succeed
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {[
                 { icon: FileText, title: 'Reading Material', desc: 'Curated passages, worksheets, and reference documents to boost reading skills.', color: 'from-emerald-500 to-teal-600', bg: 'bg-emerald-50' },
                 { icon: BookOpen, title: 'Textbooks', desc: 'Access complete textbook PDFs and study guides for every standard.', color: 'from-blue-500 to-indigo-600', bg: 'bg-blue-50' },
                 { icon: PenTool, title: 'Practice Tests', desc: 'Chapter-wise quizzes and mock exams to test your knowledge.', color: 'from-orange-500 to-red-500', bg: 'bg-orange-50' },
                 { icon: Video, title: 'Video Links', desc: 'Expert-led video lessons covering grammar, comprehension and more.', color: 'from-purple-500 to-pink-500', bg: 'bg-purple-50' },
               ].map((feature, i) => (
-                <div key={feature.title} className={`stat-card-3d rounded-2xl border border-border/50 p-8 ${feature.bg} animate-slide-up`} style={{ animationDelay: `${i * 100 + 200}ms` }}>
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 shadow-lg`}>
-                    <feature.icon className="h-7 w-7 text-white" />
+                <div key={feature.title} className={`stat-card-3d rounded-2xl border border-border/50 p-4 sm:p-8 ${feature.bg} animate-slide-up`} style={{ animationDelay: `${i * 100 + 200}ms` }}>
+                  <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-3 sm:mb-5 shadow-lg`}>
+                    <feature.icon className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+                  <h3 className="text-base sm:text-xl font-bold text-foreground mb-1 sm:mb-2">{feature.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default function HomePage() {
         </section>
 
         {/* Standards Preview */}
-        <section className="py-20 bg-muted/30">
+        <section className="py-12 sm:py-20 bg-muted/30">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">
@@ -127,17 +127,17 @@ export default function HomePage() {
                 Content curated for every academic standard
               </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 max-w-4xl mx-auto">
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 max-w-4xl mx-auto">
               {[6, 7, 8, 9, 10, 11, 12].map((std, i) => (
                 <div
                   key={std}
-                  className="stat-card-3d rounded-2xl bg-white border border-border/50 p-6 flex flex-col items-center justify-center text-center shadow-sm animate-scale-in"
+                  className="stat-card-3d rounded-2xl bg-white border border-border/50 p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-sm animate-scale-in"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center mb-3 shadow-md">
-                    <span className="text-xl font-bold text-white">{std}</span>
+                  <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center mb-2 sm:mb-3 shadow-md">
+                    <span className="text-lg sm:text-xl font-bold text-white">{std}</span>
                   </div>
-                  <p className="text-sm font-semibold text-foreground">Std {std}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-foreground">Std {std}</p>
                 </div>
               ))}
             </div>
@@ -159,14 +159,14 @@ export default function HomePage() {
               <p className="text-lg text-muted-foreground mb-8 text-pretty">
                 Join thousands of students who are already learning with EnglishMaster.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button size="lg" asChild className="shadow-lg">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Button size="lg" asChild className="shadow-lg w-full sm:w-auto">
                   <Link href="/signup">
                     Create Free Account
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild>
+                <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
                   <Link href="/signin">Sign In</Link>
                 </Button>
               </div>
