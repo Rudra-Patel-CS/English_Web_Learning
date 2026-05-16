@@ -47,10 +47,10 @@ export default function StudentDashboard() {
         <div className="relative rounded-2xl overflow-hidden animated-gradient-bg p-8 md:p-10">
           {/* Floating decorations */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-4 right-8 animate-float opacity-40 hidden md:block">
+            <div className="absolute top-4 -right-10 md:right-8 animate-float opacity-20 md:opacity-40 scale-[0.4] md:scale-100 origin-right">
               <div className="threed-pencil" style={{ transform: 'rotate(-30deg) scale(0.6)' }} />
             </div>
-            <div className="absolute bottom-4 right-24 animate-float-slow opacity-30 hidden md:block">
+            <div className="absolute bottom-4 -right-16 md:right-24 animate-float-slow opacity-15 md:opacity-30 scale-[0.4] md:scale-100 origin-right">
               <div className="threed-book" style={{ transform: 'perspective(500px) rotateY(-15deg) scale(0.6)' }} />
             </div>
             <div className="absolute top-6 left-[60%] w-5 h-5 rounded-full bg-blue-400/20 animate-float delay-300" />

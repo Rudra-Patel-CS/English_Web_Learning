@@ -197,14 +197,17 @@ export default function SystemSecurityPage() {
     setUnlockError('')
     setUnlocking(true)
     
-    if (!user?.email) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const trueAuthEmail = session?.user?.email
+
+    if (!trueAuthEmail) {
        setUnlockError('Authentication session not found')
        setUnlocking(false)
        return
     }
 
     const { error } = await supabase.auth.signInWithPassword({
-      email: user.email,
+      email: trueAuthEmail,
       password: unlockPassword
     })
 

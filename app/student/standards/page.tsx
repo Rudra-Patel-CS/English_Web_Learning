@@ -49,7 +49,7 @@ export default function StudentStandardsPage() {
         {/* Page Header */}
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 p-8">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-4 right-10 animate-float opacity-30 hidden md:block">
+            <div className="absolute top-4 -right-12 md:right-10 animate-float opacity-15 md:opacity-30 scale-[0.35] md:scale-100 origin-right">
               <div className="threed-pencil" style={{ transform: 'rotate(-25deg) scale(0.5)' }} />
             </div>
             <div className="absolute top-6 right-[40%] w-4 h-4 rounded-full bg-primary/20 animate-float-slow" />

@@ -245,9 +245,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updatePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'Not authenticated' }
 
+    // Fetch the true auth email to prevent mismatches if public profile is out of sync
+    const { data: { session } } = await supabase.auth.getSession()
+    const trueAuthEmail = session?.user?.email
+
+    if (!trueAuthEmail) return { success: false, error: 'Authentication session not found' }
+
     // First verify current password by re-signing in (Legacy check, kept for older GoTrue versions)
     const { error: verifyError } = await supabase.auth.signInWithPassword({
-      email: user.email,
+      email: trueAuthEmail,
       password: currentPassword,
     })
 
@@ -272,6 +278,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const enrollMfa = async () => {
+    // Clean up any stale unverified factors so we can generate a new QR code
+    const { data: factors } = await supabase.auth.mfa.listFactors()
+    if (factors?.totp) {
+      for (const factor of factors.totp) {
+        if (factor.status === 'unverified') {
+          await supabase.auth.mfa.unenroll({ factorId: factor.id })
+        }
+      }
+    }
+
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
     if (error) return { success: false, error: error.message }
     return { 

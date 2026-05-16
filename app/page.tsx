@@ -23,12 +23,12 @@ export default function HomePage() {
           {/* Floating 3D Decorative Elements */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {/* Floating Pencil */}
-            <div className="absolute top-20 left-[8%] animate-float opacity-60">
+            <div className="absolute top-12 md:top-20 -left-10 md:left-[8%] animate-float opacity-30 md:opacity-60 scale-[0.4] md:scale-100 origin-left">
               <div className="threed-pencil" />
             </div>
             
             {/* Floating Book */}
-            <div className="absolute top-32 right-[10%] animate-float-slow opacity-50">
+            <div className="absolute top-24 md:top-32 -right-12 md:right-[10%] animate-float-slow opacity-25 md:opacity-50 scale-[0.4] md:scale-100 origin-right">
               <div className="threed-book" />
             </div>
             
@@ -50,7 +50,7 @@ export default function HomePage() {
             </div>
 
             {/* Floating Pencil 2 - right side */}
-            <div className="absolute bottom-40 right-[8%] animate-float-reverse opacity-40 hidden lg:block">
+            <div className="absolute bottom-20 md:bottom-40 -right-16 md:right-[8%] animate-float-reverse opacity-20 md:opacity-40 scale-[0.4] md:scale-100 origin-right">
               <div className="threed-pencil" style={{ transform: 'rotate(15deg) scale(0.7)' }} />
             </div>
 
@@ -145,9 +145,9 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 relative overflow-hidden">
+        <section className="py-16 md:py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-          <div className="absolute top-10 right-10 animate-float opacity-30 hidden lg:block">
+          <div className="absolute top-10 -right-16 md:right-10 animate-float opacity-15 md:opacity-30 scale-[0.4] md:scale-100 origin-right">
             <div className="threed-book" style={{ transform: 'perspective(500px) rotateY(-15deg) scale(0.8)' }} />
           </div>
           <div className="container mx-auto px-4 md:px-6 relative">

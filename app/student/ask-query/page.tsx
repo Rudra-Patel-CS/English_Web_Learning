@@ -102,6 +102,23 @@ export default function AskQueryPage() {
       return
     }
 
+    // Ping the notification API to send an email to the admin
+    try {
+      await fetch('/api/notify-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentName: form.student_name,
+          studentEmail: form.student_email,
+          subject: form.subject,
+          doubt: form.doubt,
+          standard: form.standard
+        }),
+      })
+    } catch (e) {
+      console.error('Failed to notify admin', e)
+    }
+
     setIsSubmitted(true)
   }
 
@@ -148,7 +165,7 @@ export default function AskQueryPage() {
       <div className="p-6 space-y-6">
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-4 right-8 animate-float opacity-30 hidden md:block">
+            <div className="absolute top-4 -right-16 md:right-8 animate-float opacity-15 md:opacity-30 scale-[0.35] md:scale-100 origin-right">
               <div className="threed-pencil" style={{ transform: 'rotate(-25deg) scale(0.5)' }} />
             </div>
           </div>

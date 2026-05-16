@@ -13,7 +13,7 @@ export default function StudentAboutPage() {
         {/* Hero Banner */}
         <div className="relative rounded-2xl overflow-hidden animated-gradient-bg p-10 text-center">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-6 right-12 animate-float opacity-30 hidden md:block">
+            <div className="absolute top-6 -right-16 md:right-12 animate-float opacity-15 md:opacity-30 scale-[0.4] md:scale-100 origin-right">
               <div className="threed-book" style={{ transform: 'perspective(500px) rotateY(-15deg) scale(0.6)' }} />
             </div>
             <div className="absolute bottom-4 left-10 w-6 h-6 rounded-full bg-primary/15 animate-float-slow" />

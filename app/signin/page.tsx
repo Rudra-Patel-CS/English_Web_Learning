@@ -208,8 +208,18 @@ function SignInForm() {
       </div>
 
       {/* Right Panel — Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-background">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-background relative overflow-hidden">
+        {/* Mobile 3D elements (visible only on small screens) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden lg:hidden">
+            <div className="absolute top-10 -right-16 animate-float opacity-20 scale-[0.4] origin-right">
+              <div className="threed-pencil" style={{ transform: 'rotate(-30deg)' }} />
+            </div>
+            <div className="absolute bottom-10 -left-16 animate-float-slow opacity-15 scale-[0.4] origin-left">
+              <div className="threed-book" style={{ transform: 'perspective(500px) rotateY(15deg)' }} />
+            </div>
+        </div>
+        
+        <div className="w-full max-w-md relative z-10 bg-background/80 backdrop-blur-sm p-6 sm:p-0 rounded-2xl">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
