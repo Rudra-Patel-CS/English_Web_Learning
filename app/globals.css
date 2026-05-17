@@ -396,10 +396,8 @@ aside {
     -webkit-transform: translateX(-100%) !important;
   }
 
-  /* Show sidebar when body or aside has open state */
-  body.sidebar-open aside,
-  aside[style*="translateX(0)"],
-  aside[style*="translate(0"] {
+  /* Show sidebar when it has data-mobile-open="true" attribute */
+  aside[data-mobile-open="true"] {
     transform: translateX(0) !important;
     -webkit-transform: translateX(0) !important;
   }

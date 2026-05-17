@@ -21,9 +21,10 @@ export default function StudentLayout({
         {/* Mobile Header with hamburger menu */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-30 h-14 bg-background/95 backdrop-blur border-b border-border flex items-center px-4 gap-3">
           <Button 
+            type="button"
             variant="ghost" 
             size="icon"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
             className="text-foreground flex-shrink-0 h-9 w-9"
           >
             <Menu className="h-5 w-5" />

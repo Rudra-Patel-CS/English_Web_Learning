@@ -18,7 +18,7 @@ import {
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/lib/auth-context'
 
 const menuItems = [
@@ -45,6 +45,7 @@ export function AdminSidebar({
   const { user, logout } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  const previousPathname = useRef(pathname)
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -60,10 +61,11 @@ export function AdminSidebar({
   }, [])
 
   useEffect(() => {
-    if (onMobileClose) {
+    if (pathname !== previousPathname.current && mobileOpen && onMobileClose) {
       onMobileClose()
     }
-  }, [pathname, onMobileClose])
+    previousPathname.current = pathname
+  }, [pathname, mobileOpen, onMobileClose])
 
   useEffect(() => {
     if (mobileOpen) {
@@ -93,21 +95,11 @@ export function AdminSidebar({
 
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300',
-          collapsed ? 'w-16' : 'w-64'
+          'fixed left-0 top-0 z-50 h-screen bg-sidebar border-r border-sidebar-border transition-transform duration-300',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          collapsed ? 'w-16' : 'w-64',
         )}
-        style={{
-          transform: isDesktop
-            ? 'translateX(0)'
-            : mobileOpen
-            ? 'translateX(0)'
-            : 'translateX(-100%)',
-          WebkitTransform: isDesktop
-            ? 'translateX(0)'
-            : mobileOpen
-            ? 'translateX(0)'
-            : 'translateX(-100%)',
-        }}
+        data-mobile-open={mobileOpen ? 'true' : 'false'}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}

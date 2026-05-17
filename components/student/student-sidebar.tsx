@@ -16,7 +16,7 @@ import {
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/lib/auth-context'
 
 const menuItems = [
@@ -38,6 +38,8 @@ export function StudentSidebar({ mobileOpen = false, onMobileClose }: StudentSid
   const [collapsed, setCollapsed] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
 
+  const previousPathname = useRef(pathname)
+
   // Check if we're on desktop
   useEffect(() => {
     const checkDesktop = () => {
@@ -48,12 +50,13 @@ export function StudentSidebar({ mobileOpen = false, onMobileClose }: StudentSid
     return () => window.removeEventListener('resize', checkDesktop)
   }, [])
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change only when pathname actually changes
   useEffect(() => {
-    if (onMobileClose) {
+    if (pathname !== previousPathname.current && mobileOpen && onMobileClose) {
       onMobileClose()
     }
-  }, [pathname, onMobileClose])
+    previousPathname.current = pathname
+  }, [pathname, mobileOpen, onMobileClose])
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -80,14 +83,11 @@ export function StudentSidebar({ mobileOpen = false, onMobileClose }: StudentSid
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border transition-all duration-300',
-          // Desktop - always visible, collapse responsive
-          collapsed ? 'lg:w-16' : 'lg:w-64',
+          'fixed left-0 top-0 z-50 h-screen bg-sidebar border-r border-sidebar-border transition-transform duration-300',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          collapsed ? 'w-16 lg:w-16' : 'w-64 lg:w-64',
         )}
-        style={{
-          transform: isDesktop ? 'translateX(0)' : (mobileOpen ? 'translateX(0)' : 'translateX(-100%)'),
-          WebkitTransform: isDesktop ? 'translateX(0)' : (mobileOpen ? 'translateX(0)' : 'translateX(-100%)'),
-        }}
+        data-mobile-open={mobileOpen ? 'true' : 'false'}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}

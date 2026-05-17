@@ -40,9 +40,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Mobile Header - Always visible and clickable */}
       <div className="mobile-header lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center px-4 gap-4">
         <Button 
+          type="button"
           variant="ghost" 
           size="icon"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
           className="text-foreground flex-shrink-0"
         >
           <Menu className="h-6 w-6" />
