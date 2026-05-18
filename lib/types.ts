@@ -7,6 +7,7 @@ export interface User {
   role: UserRole
   avatar_url?: string
   standard?: string
+  notification_email?: string
   created_at?: string
   updated_at?: string
 }

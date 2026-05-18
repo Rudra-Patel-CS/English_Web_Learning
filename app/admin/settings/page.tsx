@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { Shield, User, Eye, EyeOff, Loader2, Save, LogOut, Lock, Key, QrCode, CheckCircle2, XCircle } from 'lucide-react'
 
 export default function SystemSecurityPage() {
-  const { user, updateProfile, updateEmail, updatePassword, logout, enrollMfa, verifyMfa, challengeMfa, unenrollMfa } = useAuth()
+  const { user, updateProfile, updateEmail, updateNotificationEmail, updatePassword, logout, enrollMfa, verifyMfa, challengeMfa, unenrollMfa } = useAuth()
   
   // Lock screen
   const [isUnlocked, setIsUnlocked] = useState(false)
@@ -23,9 +23,13 @@ export default function SystemSecurityPage() {
   // Profile settings
   const [displayName, setDisplayName] = useState(user?.name || '')
   const [displayEmail, setDisplayEmail] = useState(user?.email || '')
+  const [notificationEmail, setNotificationEmail] = useState(user?.notification_email || '')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSuccess, setProfileSuccess] = useState('')
   const [profileError, setProfileError] = useState('')
+  const [notificationSaving, setNotificationSaving] = useState(false)
+  const [notificationSuccess, setNotificationSuccess] = useState('')
+  const [notificationError, setNotificationError] = useState('')
 
   // Password settings
   const [currentPassword, setCurrentPassword] = useState('')
@@ -51,6 +55,12 @@ export default function SystemSecurityPage() {
   useEffect(() => {
     checkMfaStatus()
   }, [])
+
+  useEffect(() => {
+    setDisplayName(user?.name || '')
+    setDisplayEmail(user?.email || '')
+    setNotificationEmail(user?.notification_email || '')
+  }, [user])
 
   const checkMfaStatus = async () => {
     const { data, error } = await supabase.auth.mfa.listFactors()
@@ -83,6 +93,8 @@ export default function SystemSecurityPage() {
   const handleUpdateEmail = async () => {
     setProfileError('')
     setProfileSuccess('')
+    setNotificationError('')
+    setNotificationSuccess('')
     if (!displayEmail.trim() || !displayEmail.includes('@')) {
       setProfileError('Please enter a valid email address')
       return
@@ -100,6 +112,25 @@ export default function SystemSecurityPage() {
       setProfileError(result.error || 'Failed to update email')
     }
     setProfileSaving(false)
+  }
+
+  const handleUpdateNotificationEmail = async () => {
+    setNotificationError('')
+    setNotificationSuccess('')
+
+    if (notificationEmail.trim() && !notificationEmail.includes('@')) {
+      setNotificationError('Please enter a valid notification email address')
+      return
+    }
+
+    setNotificationSaving(true)
+    const result = await updateNotificationEmail(notificationEmail)
+    if (result.success) {
+      setNotificationSuccess('Notification email saved successfully!')
+    } else {
+      setNotificationError(result.error || 'Failed to save notification email')
+    }
+    setNotificationSaving(false)
   }
 
   const handleUpdatePassword = async () => {
@@ -332,9 +363,34 @@ export default function SystemSecurityPage() {
                     Update Email
                   </Button>
                 </div>
+
+                <div className="space-y-2 pt-4 border-t border-border/40">
+                  <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Notification Email
+                  </Label>
+                  <Input
+                    value={notificationEmail}
+                    onChange={(e) => setNotificationEmail(e.target.value)}
+                    type="email"
+                    className="h-12 bg-[#faf9f7] border-border/60 font-medium"
+                    autoComplete="off"
+                  />
+                  <p className="text-sm text-muted-foreground">Student queries will be routed to this address. Leave blank to use the admin login email.</p>
+                  <Button
+                    onClick={handleUpdateNotificationEmail}
+                    disabled={notificationSaving}
+                    style={{ backgroundColor: '#2563eb', color: '#ffffff', border: '1px solid #1d4ed8' }}
+                    className="shadow-sm mt-2"
+                  >
+                    {notificationSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    Save Notification Email
+                  </Button>
+                </div>
                 
                 {profileError && <p className="text-sm text-red-600 font-medium pt-2">{profileError}</p>}
+                {notificationError && <p className="text-sm text-red-600 font-medium pt-2">{notificationError}</p>}
                 {profileSuccess && <p className="text-sm text-green-600 font-medium pt-2">{profileSuccess}</p>}
+                {notificationSuccess && <p className="text-sm text-green-600 font-medium pt-2">{notificationSuccess}</p>}
               </div>
             </CardContent>
           </Card>

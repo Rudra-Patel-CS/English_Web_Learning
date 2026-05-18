@@ -10,7 +10,8 @@ interface AuthContextType {
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>
   updateProfile: (data: { name?: string }) => Promise<{ success: boolean; error?: string }>
-  updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string }>
+  updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string; pending?: boolean }>
+  updateNotificationEmail: (newNotificationEmail: string) => Promise<{ success: boolean; error?: string }>
   updatePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   isLoading: boolean
@@ -49,15 +50,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.warn('Supabase getSession error:', error.message)
+          await supabase.auth.signOut()
+        }
+
         if (session?.user) {
           const profile = await fetchUserProfile(session.user.id)
           if (profile) {
             setUser(profile)
           }
         }
-      } catch {
-        // Session expired or invalid
+      } catch (error) {
+        console.warn('Supabase session initialization failed:', error)
+        await supabase.auth.signOut()
       }
       setIsLoading(false)
     }
@@ -84,8 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (profile) {
           setUser(profile)
         }
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESH_FAILED') {
         setUser(null)
+        await supabase.auth.signOut()
       }
     })
 
@@ -242,6 +250,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true, pending: false }
   }
 
+  const updateNotificationEmail = async (newNotificationEmail: string): Promise<{ success: boolean; error?: string }> => {
+    if (!user) return { success: false, error: 'Not authenticated' }
+
+    const payload: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    }
+
+    if (newNotificationEmail.trim()) {
+      payload.notification_email = newNotificationEmail.toLowerCase()
+    } else {
+      payload.notification_email = null
+    }
+
+    const { error } = await supabase
+      .from('users')
+      .update(payload)
+      .eq('id', user.id)
+
+    if (error) return { success: false, error: error.message }
+
+    setUser(prev => prev ? { ...prev, notification_email: newNotificationEmail.trim() ? newNotificationEmail.toLowerCase() : undefined } : null)
+    return { success: true }
+  }
+
   const updatePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'Not authenticated' }
 
@@ -326,7 +358,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{ 
       user, login, signup, signInWithGoogle, 
-      updateProfile, updateEmail, updatePassword, logout, isLoading,
+      updateProfile, updateEmail, updateNotificationEmail, updatePassword, logout, isLoading,
       enrollMfa, verifyMfa, challengeMfa, unenrollMfa
     }}>
       {children}

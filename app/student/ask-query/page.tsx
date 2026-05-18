@@ -104,7 +104,7 @@ export default function AskQueryPage() {
 
     // Ping the notification API to send an email to the admin
     try {
-      await fetch('/api/notify-admin', {
+      const notifyResponse = await fetch('/api/notify-admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,11 +112,23 @@ export default function AskQueryPage() {
           studentEmail: form.student_email,
           subject: form.subject,
           doubt: form.doubt,
-          standard: form.standard
+          standard: form.standard,
         }),
       })
+
+      if (!notifyResponse.ok) {
+        const errorData = await notifyResponse.json().catch(() => null)
+        console.error('Notification failed', errorData)
+        const message = errorData?.error || 'Query saved, but notification email could not be delivered. Please ask the admin to check the notification configuration.'
+        setError(message)
+        setIsSubmitting(false)
+        return
+      }
     } catch (e) {
       console.error('Failed to notify admin', e)
+      setError('Query saved, but notification email could not be delivered. Please ask the admin to check the notification configuration.')
+      setIsSubmitting(false)
+      return
     }
 
     setIsSubmitted(true)
