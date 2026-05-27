@@ -1,0 +1,405 @@
+===============================================
+QUICK SETUP - ALL 3 CUSTOM FORMS
+===============================================
+
+STEP 1: DATABASE (1 minute)
+----------------------------
+Run in Supabase SQL Editor:
+
+→ scripts/add-question-data-column.sql
+
+This adds question_data column to store structured data.
+
+===============================================
+
+STEP 2: STORAGE (2 minutes) - FOR READ DATA FORM
+-------------------------------------------------
+In Supabase Dashboard:
+
+1. Go to Storage
+2. Click "New bucket"
+3. Name: question-assets
+4. Public: ✓ Yes
+5. Click "Create bucket"
+
+6. Add Policies:
+
+-- Upload policy
+CREATE POLICY "Allow authenticated uploads"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'question-assets');
+
+-- Read policy
+CREATE POLICY "Allow public read"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'question-assets');
+
+===============================================
+
+STEP 3: ADD INSTRUCTION TYPES (30 seconds)
+-------------------------------------------
+In manage-questions/page.tsx, add to lists:
+
+const INSTRUCTION_TYPES_WITHOUT_UNITS = [
+  // ... existing types ...
+  'Nearest meaning',
+  'Opposite meaning',
+  'Read the Data and answer the question', // NEW!
+]
+
+const INSTRUCTION_TYPES_WITH_UNITS = [
+  // ... existing types ...
+  'Fill in the blanks (Textbook) 3 mark',
+  'Fill in the blanks (Textbook) 4 mark',
+  'Fill in the blanks (Textbook) 5 mark',
+]
+
+===============================================
+
+STEP 4: IMPORT COMPONENTS (1 minute)
+-------------------------------------
+At top of manage-questions/page.tsx:
+
+import { QuestionFormSelector, needsCustomForm } from '@/components/admin/question-forms/QuestionFormSelector'
+import type { NearestMeaningData } from '@/components/admin/question-forms/NearestMeaningForm'
+import type { FillInTheBlanksData } from '@/components/admin/question-forms/FillInTheBlanksForm'
+import type { ReadDataFormData } from '@/components/admin/question-forms/ReadDataForm'
+
+===============================================
+
+STEP 5: ADD HANDLER FUNCTIONS (5 minutes)
+------------------------------------------
+Copy these three functions into your component:
+
+// 1. Nearest Meaning Handler
+const handleNearestMeaningSubmit = async (data: NearestMeaningData) => {
+  if (!selectedStandard || !selectedInstruction) {
+    alert('Please select standard and instruction type first.')
+    return
+  }
+
+  setSubmitting(true)
+  try {
+    const questionText = `Find the ${selectedInstruction.toLowerCase()} of: "${data.word}"`
+    
+    const payload = {
+      standard: selectedStandard?.grade_number?.toString() || selectedStandard?.name || '',
+      instruction_type: selectedInstruction,
+      unit_id: hasUnits && selectedUnit ? selectedUnit : null,
+      unit_name: hasUnits && selectedUnit ? units.find(u => u.id === selectedUnit)?.name : null,
+      question_text: questionText,
+      answer: data.correctAnswer,
+      marks: data.marks,
+      difficulty: data.difficulty,
+      options: data.options,
+      question_data: {
+        type: 'nearest_meaning',
+        word: data.word,
+        options: data.options,
+        correctAnswer: data.correctAnswer
+      },
+      created_at: new Date().toISOString(),
+    }
+
+    const { error } = await supabase.from('questions').insert([payload])
+    if (error) throw error
+
+    await fetchQuestions()
+    alert('Question added successfully!')
+  } catch (error) {
+    console.error('Error adding question:', error)
+    alert('Failed to add question')
+  } finally {
+    setSubmitting(false)
+  }
+}
+
+// 2. Fill in Blanks Handler
+const handleFillInBlanksSubmit = async (data: FillInTheBlanksData) => {
+  if (!selectedStandard || !selectedInstruction) {
+    alert('Please select standard and instruction type first.')
+    return
+  }
+
+  setSubmitting(true)
+  try {
+    const questionText = `Complete the paragraph filling in the blanks with the appropriate words from the brackets.\n(${data.options.join(', ')})\n\n${data.paragraph}`
+    
+    const payload = {
+      standard: selectedStandard?.grade_number?.toString() || selectedStandard?.name || '',
+      instruction_type: selectedInstruction,
+      unit_id: hasUnits && selectedUnit ? selectedUnit : null,
+      unit_name: hasUnits && selectedUnit ? units.find(u => u.id === selectedUnit)?.name : null,
+      question_text: questionText,
+      answer: data.options.join(', '),
+      marks: data.marks,
+      difficulty: data.difficulty,
+      options: data.options,
+      question_data: {
+        type: 'fill_in_blanks',
+        paragraph: data.paragraph,
+        blanks: data.blanks,
+        options: data.options
+      },
+      created_at: new Date().toISOString(),
+    }
+
+    const { error } = await supabase.from('questions').insert([payload])
+    if (error) throw error
+
+    await fetchQuestions()
+    alert('Question added successfully!')
+  } catch (error) {
+    console.error('Error adding question:', error)
+    alert('Failed to add question')
+  } finally {
+    setSubmitting(false)
+  }
+}
+
+// 3. Read Data Handler
+const handleReadDataSubmit = async (data: ReadDataFormData) => {
+  if (!selectedStandard || !selectedInstruction) {
+    alert('Please select standard and instruction type first.')
+    return
+  }
+
+  setSubmitting(true)
+  try {
+    // Upload image
+    let imageUrl = ''
+    if (data.imageFile) {
+      const fileExt = data.imageFile.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `question-images/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('question-assets')
+        .upload(filePath, data.imageFile)
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        alert('Failed to upload image')
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('question-assets')
+        .getPublicUrl(filePath)
+
+      imageUrl = publicUrl
+    }
+
+    const questionText = `Read the data from the image and answer the following questions:\n\n${data.subQuestions.map((sq, idx) => `Question ${idx + 1}: ${sq.question}`).join('\n')}`
+    const answerText = data.subQuestions.map((sq, idx) => `${idx + 1}. ${sq.answer}`).join('\n')
+
+    const payload = {
+      standard: selectedStandard?.grade_number?.toString() || selectedStandard?.name || '',
+      instruction_type: selectedInstruction,
+      unit_id: hasUnits && selectedUnit ? selectedUnit : null,
+      unit_name: hasUnits && selectedUnit ? units.find(u => u.id === selectedUnit)?.name : null,
+      question_text: questionText,
+      answer: answerText,
+      marks: data.marks,
+      difficulty: data.difficulty,
+      question_data: {
+        type: 'read_data',
+        imageUrl: imageUrl,
+        subQuestions: data.subQuestions
+      },
+      created_at: new Date().toISOString(),
+    }
+
+    const { error } = await supabase.from('questions').insert([payload])
+    if (error) throw error
+
+    await fetchQuestions()
+    alert('Question added successfully!')
+  } catch (error) {
+    console.error('Error adding question:', error)
+    alert('Failed to add question')
+  } finally {
+    setSubmitting(false)
+  }
+}
+
+===============================================
+
+STEP 6: UPDATE FORM RENDERING (2 minutes)
+------------------------------------------
+In the "Add Question" TabsContent, replace form with:
+
+<TabsContent value="add">
+  <Card className="shadow-sm border-muted/60">
+    <CardContent className="p-6">
+      {needsCustomForm(selectedInstruction) ? (
+        <QuestionFormSelector
+          instructionType={selectedInstruction}
+          onSubmitNearestMeaning={handleNearestMeaningSubmit}
+          onSubmitFillInBlanks={handleFillInBlanksSubmit}
+          onSubmitReadData={handleReadDataSubmit}
+          disabled={submitting}
+        />
+      ) : (
+        <form onSubmit={handleAddQuestion} className="space-y-5">
+          {/* Your existing form code */}
+        </form>
+      )}
+    </CardContent>
+  </Card>
+</TabsContent>
+
+===============================================
+
+STEP 7: UPDATE QUESTION DISPLAY (3 minutes)
+--------------------------------------------
+Add this function before your return statement:
+
+const renderQuestionDisplay = (q: Question) => {
+  // Nearest Meaning
+  if (q.question_data?.type === 'nearest_meaning') {
+    return (
+      <div className="space-y-2">
+        <p className="font-medium">
+          Find the {selectedInstruction.toLowerCase()} of: <strong>"{q.question_data.word}"</strong>
+        </p>
+        <div className="text-sm space-y-1">
+          {q.question_data.options.map((opt: string, idx: number) => (
+            <div key={idx} className={opt === q.question_data.correctAnswer ? 'text-green-600 font-medium' : ''}>
+              {String.fromCharCode(65 + idx)}. {opt}
+              {opt === q.question_data.correctAnswer && ' ✓'}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Fill in Blanks
+  if (q.question_data?.type === 'fill_in_blanks') {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">
+          Options: ({q.question_data.options.join(', ')})
+        </p>
+        <p className="font-medium whitespace-pre-wrap">{q.question_data.paragraph}</p>
+        <p className="text-sm"><strong>Answers:</strong> {q.answer}</p>
+      </div>
+    )
+  }
+
+  // Read Data
+  if (q.question_data?.type === 'read_data') {
+    return (
+      <div className="space-y-3">
+        {q.question_data.imageUrl && (
+          <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+            <Image
+              src={q.question_data.imageUrl}
+              alt="Question data"
+              fill
+              className="object-contain"
+            />
+          </div>
+        )}
+        <div className="space-y-2">
+          {q.question_data.subQuestions.map((sq: any, idx: number) => (
+            <div key={idx} className="border-l-2 border-blue-500 pl-3">
+              <p className="text-sm font-medium">Q{idx + 1}: {sq.question}</p>
+              <p className="text-xs text-muted-foreground">A: {sq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Default
+  return (
+    <>
+      <p className="font-medium mb-2 whitespace-pre-wrap">{q.question_text}</p>
+      <p className="text-sm text-muted-foreground"><strong>Answer:</strong> {q.answer}</p>
+    </>
+  )
+}
+
+Then use it in your question list:
+{renderQuestionDisplay(q)}
+
+===============================================
+
+STEP 8: TEST (5 minutes)
+-------------------------
+1. Go to /admin/generate-paper/manage-questions
+
+2. Test Nearest Meaning:
+   - Select "Nearest meaning"
+   - Fill form
+   - Submit
+   - Verify in list
+
+3. Test Fill in Blanks:
+   - Select "Fill in the blanks (Textbook) 3 mark"
+   - Fill form
+   - Submit
+   - Verify in list
+
+4. Test Read Data:
+   - Select "Read the Data and answer the question"
+   - Upload image
+   - Add questions
+   - Submit
+   - Verify in list with image
+
+===============================================
+
+DONE! ✅
+--------
+All three custom forms are now integrated and working!
+
+Forms Available:
+✓ Nearest Meaning / Opposite Meaning
+✓ Fill in the Blanks
+✓ Read the Data and answer the question
+
+===============================================
+
+TROUBLESHOOTING
+---------------
+Form not showing:
+→ Check instruction type matches exactly
+→ Verify imports
+
+Image not uploading:
+→ Check storage bucket exists
+→ Verify bucket is public
+→ Check policies
+
+Data not saving:
+→ Run database migration
+→ Check question_data column exists
+→ Verify handler functions
+
+===============================================
+
+DOCUMENTATION
+-------------
+Detailed Guides:
+- INTEGRATION-GUIDE-CUSTOM-FORMS.md
+- READ-DATA-FORM-GUIDE.md
+- CUSTOM-FORMS-SUMMARY.md
+
+Quick Reference:
+- ALL-CUSTOM-FORMS-SUMMARY.txt
+- read-data-examples.txt
+- SETUP-ALL-FORMS-QUICK.txt (this file)
+
+===============================================
+
+Total Setup Time: ~15 minutes
+All forms ready to use!
+
+Happy teaching! 📚
+===============================================

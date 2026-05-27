@@ -1,0 +1,321 @@
+===============================================
+READ THE DATA FORM - VISUAL EXAMPLES
+===============================================
+
+EXAMPLE 1: POPULATION TABLE
+----------------------------
+Admin uploads image of population table and adds questions:
+
+[IMAGE: Population Table showing states and their populations]
+
+Question 1: What is the total population of India according to the table?
+Answer 1: The total population of India is 1.4 billion
+
+Question 2: Which state has the highest population?
+Answer 2: Uttar Pradesh has the highest population with 200 million
+
+Question 3: What is the population of Maharashtra?
+Answer 3: The population of Maharashtra is 112 million
+
+Marks: 5
+Difficulty: Medium
+
+===============================================
+
+EXAMPLE 2: BAR CHART
+---------------------
+Admin uploads image of sales bar chart:
+
+[IMAGE: Bar Chart showing monthly sales from Jan to Jun]
+
+Question 1: Which month had the highest sales?
+Answer 1: June had the highest sales with 50,000 units
+
+Question 2: What was the total sales in Q1 (Jan-Mar)?
+Answer 2: The total sales in Q1 was 90,000 units
+
+Question 3: Compare the sales between January and February
+Answer 3: February sales (35,000) were 5,000 units higher than January (30,000)
+
+Marks: 6
+Difficulty: Hard
+
+===============================================
+
+EXAMPLE 3: PIE CHART
+---------------------
+Admin uploads image of budget allocation pie chart:
+
+[IMAGE: Pie Chart showing government budget allocation]
+
+Question 1: What percentage of the budget is allocated to education?
+Answer 1: 25% of the budget is allocated to education
+
+Question 2: Which sector has the largest allocation?
+Answer 2: Defense has the largest allocation at 30%
+
+Question 3: What is the combined allocation for health and education?
+Answer 3: The combined allocation is 40% (25% + 15%)
+
+Marks: 4
+Difficulty: Medium
+
+===============================================
+
+EXAMPLE 4: LINE GRAPH
+----------------------
+Admin uploads image of temperature line graph:
+
+[IMAGE: Line Graph showing temperature over 7 days]
+
+Question 1: What was the highest temperature recorded?
+Answer 1: The highest temperature was 38°C on Day 5
+
+Question 2: On which day was the temperature lowest?
+Answer 2: The temperature was lowest on Day 1 at 28°C
+
+Question 3: What is the average temperature for the week?
+Answer 3: The average temperature is 33°C
+
+Question 4: Describe the temperature trend
+Answer 4: The temperature showed an increasing trend from Day 1 to Day 5, then decreased slightly
+
+Marks: 8
+Difficulty: Hard
+
+===============================================
+
+EXAMPLE 5: DATA TABLE (CRICKET SCORES)
+---------------------------------------
+Admin uploads image of cricket scorecard:
+
+[IMAGE: Table showing player names, runs, balls, 4s, 6s]
+
+Question 1: Who scored the highest runs?
+Answer 1: Virat Kohli scored the highest with 89 runs
+
+Question 2: What was the team's total score?
+Answer 2: The team's total score was 285 runs
+
+Question 3: Which player had the best strike rate?
+Answer 3: Rohit Sharma had the best strike rate of 145.5
+
+Marks: 5
+Difficulty: Medium
+
+===============================================
+
+EXAMPLE 6: TIMETABLE
+--------------------
+Admin uploads image of school timetable:
+
+[IMAGE: Weekly class timetable]
+
+Question 1: How many English classes are there in a week?
+Answer 1: There are 5 English classes in a week
+
+Question 2: On which day is there no Mathematics class?
+Answer 2: There is no Mathematics class on Friday
+
+Question 3: What is the first period on Monday?
+Answer 3: The first period on Monday is Science
+
+Marks: 3
+Difficulty: Easy
+
+===============================================
+
+EXAMPLE 7: MAP DATA
+-------------------
+Admin uploads image of India map with states:
+
+[IMAGE: Map of India showing different states]
+
+Question 1: Which states share a border with Maharashtra?
+Answer 1: Gujarat, Madhya Pradesh, Karnataka, Goa, and Telangana share borders with Maharashtra
+
+Question 2: Which is the largest state by area?
+Answer 2: Rajasthan is the largest state by area
+
+Question 3: Name the coastal states on the western side
+Answer 3: Gujarat, Maharashtra, Goa, Karnataka, and Kerala are coastal states on the western side
+
+Marks: 6
+Difficulty: Medium
+
+===============================================
+
+EXAMPLE 8: SCIENTIFIC DATA
+---------------------------
+Admin uploads image of periodic table section:
+
+[IMAGE: Section of periodic table showing elements]
+
+Question 1: What is the atomic number of Carbon?
+Answer 1: The atomic number of Carbon is 6
+
+Question 2: Which element has the symbol 'Fe'?
+Answer 2: Iron has the symbol 'Fe'
+
+Question 3: What is the atomic mass of Oxygen?
+Answer 3: The atomic mass of Oxygen is 16
+
+Marks: 4
+Difficulty: Easy
+
+===============================================
+
+EXAMPLE 9: HISTORICAL TIMELINE
+-------------------------------
+Admin uploads image of historical timeline:
+
+[IMAGE: Timeline showing major events from 1900-2000]
+
+Question 1: In which year did India gain independence?
+Answer 1: India gained independence in 1947
+
+Question 2: What major event happened in 1969?
+Answer 2: The first moon landing happened in 1969
+
+Question 3: How many years after independence did India become a republic?
+Answer 3: India became a republic 3 years after independence, in 1950
+
+Marks: 5
+Difficulty: Medium
+
+===============================================
+
+EXAMPLE 10: FOOD PYRAMID
+-------------------------
+Admin uploads image of food pyramid:
+
+[IMAGE: Food pyramid showing different food groups]
+
+Question 1: Which food group is at the base of the pyramid?
+Answer 1: Grains and cereals are at the base of the pyramid
+
+Question 2: How many servings of fruits are recommended daily?
+Answer 2: 2-3 servings of fruits are recommended daily
+
+Question 3: Which food group should be consumed in the smallest quantity?
+Answer 3: Fats, oils, and sweets should be consumed in the smallest quantity
+
+Marks: 4
+Difficulty: Easy
+
+===============================================
+
+HOW ADMIN ADDS THESE QUESTIONS
+-------------------------------
+
+Step 1: Select Instruction Type
+→ "Read the Data and answer the question"
+
+Step 2: Upload Image
+→ Click upload area
+→ Select image file (population-table.png)
+→ Preview appears
+
+Step 3: Add Questions
+→ Click "Add Question" for each question
+→ Fill in question text
+→ Fill in answer text
+→ Can add unlimited questions
+
+Step 4: Set Details
+→ Total Marks: 5
+→ Difficulty: Medium
+
+Step 5: Submit
+→ Click "Add Read Data Question"
+→ Image uploads to Supabase Storage
+→ Question saves to database
+→ Done!
+
+===============================================
+
+DISPLAY TO STUDENTS (FUTURE)
+-----------------------------
+When students see the question:
+
+┌─────────────────────────────────────┐
+│  [IMAGE: Population Table]          │
+│                                     │
+│  Read the data and answer:          │
+│                                     │
+│  1. What is the total population?   │
+│     [Answer input box]              │
+│                                     │
+│  2. Which state has highest pop?    │
+│     [Answer input box]              │
+│                                     │
+│  3. What is population density?     │
+│     [Answer input box]              │
+│                                     │
+│  [Submit Answers]                   │
+└─────────────────────────────────────┘
+
+===============================================
+
+BENEFITS OF THIS FORMAT
+-----------------------
+✅ Visual Learning
+   Students learn better with images
+
+✅ Real-World Data
+   Teaches data interpretation skills
+
+✅ Multiple Questions
+   More assessment from single image
+
+✅ Flexible
+   Works with any type of data/image
+
+✅ Easy for Admin
+   Upload once, add multiple questions
+
+✅ Engaging
+   More interesting than text-only
+
+✅ Practical Skills
+   Develops analytical thinking
+
+===============================================
+
+SUPPORTED IMAGE TYPES
+---------------------
+✓ Tables (population, scores, etc.)
+✓ Charts (bar, pie, line, etc.)
+✓ Graphs (line, scatter, etc.)
+✓ Maps (geographical, political)
+✓ Diagrams (scientific, technical)
+✓ Timetables and schedules
+✓ Infographics
+✓ Text passages (as images)
+✓ Historical timelines
+✓ Any visual data
+
+===============================================
+
+TECHNICAL DETAILS
+-----------------
+Max File Size: 5MB
+Supported Formats: JPG, PNG, JPEG, GIF
+Storage: Supabase Storage (question-assets bucket)
+Image Display: Next.js Image component (optimized)
+Questions: Unlimited sub-questions
+Marks: 1-20 per question set
+Difficulty: Easy, Medium, Hard
+
+===============================================
+
+This format is perfect for:
+- Data interpretation questions
+- Visual learning assessments
+- Chart and graph analysis
+- Map reading exercises
+- Scientific diagrams
+- Historical timelines
+- Statistical data questions
+
+===============================================

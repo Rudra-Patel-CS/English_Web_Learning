@@ -21,6 +21,8 @@ export async function POST(request: Request) {
     const { studentName, studentEmail, subject, doubt, standard } = await request.json();
 
     const adminConfigEmail = process.env.ADMIN_NOTIFICATION_EMAIL?.trim();
+    const resendTestRecipient = process.env.RESEND_TEST_RECIPIENT?.trim();
+    const resendFromEmail = process.env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev';
 
     const { data: adminUser, error: adminError } = await supabase
       .from('users')
@@ -36,12 +38,15 @@ export async function POST(request: Request) {
 
     // Use ADMIN_NOTIFICATION_EMAIL if configured. Otherwise use the admin record.
     const resolvedAdminEmail = adminConfigEmail || adminUser?.notification_email?.trim() || adminUser?.email?.trim();
+    const effectiveRecipient = resendTestRecipient || resolvedAdminEmail;
 
-    if (!resolvedAdminEmail) {
+    if (!effectiveRecipient) {
       return NextResponse.json({ error: 'Admin notification email not configured' }, { status: 500 });
     }
 
-    const resendFromEmail = process.env.RESEND_FROM_EMAIL?.trim() || 'onboarding@resend.dev';
+    if (resendTestRecipient && resendTestRecipient !== resolvedAdminEmail) {
+      console.warn('Using RESEND_TEST_RECIPIENT for mail delivery because the current Resend account is in test mode.');
+    }
 
     if (!process.env.RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not set. Please configure it in your environment variables.');
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
     // 3. Send the email using Resend
     const { data, error } = await resend.emails.send({
       from: `EnglishMaster System <${resendFromEmail}>`,
-      to: [resolvedAdminEmail],
+      to: [effectiveRecipient],
       subject: `New Student Query: ${subject}`,
       html: `
         <h2>New Doubt Submitted!</h2>

@@ -166,3 +166,31 @@ export interface FAQ {
   created_at?: string
   updated_at?: string
 }
+
+export interface QuestionUnit {
+  id: string
+  standard: string
+  instruction_type: string
+  unit_name: string
+  chapter_name?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface Question {
+  id: string
+  standard: string
+  instruction_type: string
+  unit_id?: string
+  unit_name?: string
+  question_text: string
+  answer: string
+  is_correct?: boolean
+  options?: string[] // For MCQ or multiple choice questions
+  marks?: number
+  difficulty?: 'easy' | 'medium' | 'hard'
+  question_data?: any // For storing structured data (nearest meaning, fill in blanks, etc.)
+  created_by?: string
+  created_at?: string
+  updated_at?: string
+}
