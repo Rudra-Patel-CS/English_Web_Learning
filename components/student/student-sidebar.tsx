@@ -155,8 +155,8 @@ export function StudentSidebar({ mobileOpen = false, onMobileClose }: StudentSid
           {/* Logout */}
           <div className="border-t border-sidebar-border p-3">
             <button
-              onClick={() => {
-                logout()
+              onClick={async () => {
+                await logout()
                 window.location.href = '/'
               }}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"

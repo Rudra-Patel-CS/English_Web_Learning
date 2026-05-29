@@ -13,7 +13,7 @@ interface AuthContextType {
   updateEmail: (newEmail: string) => Promise<{ success: boolean; error?: string; pending?: boolean }>
   updateNotificationEmail: (newNotificationEmail: string) => Promise<{ success: boolean; error?: string }>
   updatePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>
-  logout: () => void
+  logout: () => Promise<void>
   isLoading: boolean
   enrollMfa: () => Promise<{ success: boolean; qrCodeUrl?: string; secret?: string; factorId?: string; error?: string }>
   verifyMfa: (factorId: string, challengeId: string, code: string) => Promise<{ success: boolean; error?: string }>
@@ -54,19 +54,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) {
           console.warn('Supabase getSession error:', error.message)
           await supabase.auth.signOut()
+          setUser(null)
+          sessionStorage.removeItem('user_profile')
         }
 
         if (session?.user) {
           const profile = await fetchUserProfile(session.user.id)
           if (profile) {
             setUser(profile)
+            sessionStorage.setItem('user_profile', JSON.stringify(profile))
+          } else {
+            setUser(null)
+            sessionStorage.removeItem('user_profile')
           }
+        } else {
+          setUser(null)
+          sessionStorage.removeItem('user_profile')
         }
       } catch (error) {
         console.warn('Supabase session initialization failed:', error)
         await supabase.auth.signOut()
+        setUser(null)
+        sessionStorage.removeItem('user_profile')
       }
       setIsLoading(false)
+    }
+
+    // Try loading cached profile first
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('user_profile')
+      if (cached) {
+        try {
+          setUser(JSON.parse(cached))
+          setIsLoading(false)
+        } catch (e) {
+          sessionStorage.removeItem('user_profile')
+        }
+      }
     }
 
     initAuth()
@@ -90,9 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (profile) {
           setUser(profile)
+          sessionStorage.setItem('user_profile', JSON.stringify(profile))
         }
       } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESH_FAILED') {
         setUser(null)
+        sessionStorage.removeItem('user_profile')
         await supabase.auth.signOut()
       }
     })
@@ -143,6 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profile) {
         if (!requireMfa) {
           setUser(profile)
+          sessionStorage.setItem('user_profile', JSON.stringify(profile))
         }
         setIsLoading(false)
         return { 
@@ -189,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profile = await fetchUserProfile(authData.user.id)
       if (profile) {
         setUser(profile)
+        sessionStorage.setItem('user_profile', JSON.stringify(profile))
       }
     }
 
@@ -222,7 +250,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) return { success: false, error: error.message }
 
-    setUser(prev => prev ? { ...prev, ...data } : null)
+    setUser(prev => {
+      const updated = prev ? { ...prev, ...data } : null
+      if (updated) sessionStorage.setItem('user_profile', JSON.stringify(updated))
+      return updated
+    })
     return { success: true }
   }
 
@@ -246,7 +278,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (dbError) return { success: false, error: dbError.message }
 
-    setUser(prev => prev ? { ...prev, email: newEmail.toLowerCase() } : null)
+    setUser(prev => {
+      const updated = prev ? { ...prev, email: newEmail.toLowerCase() } : null
+      if (updated) sessionStorage.setItem('user_profile', JSON.stringify(updated))
+      return updated
+    })
     return { success: true, pending: false }
   }
 
@@ -270,7 +306,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) return { success: false, error: error.message }
 
-    setUser(prev => prev ? { ...prev, notification_email: newNotificationEmail.trim() ? newNotificationEmail.toLowerCase() : undefined } : null)
+    setUser(prev => {
+      const updated = prev ? { ...prev, notification_email: newNotificationEmail.trim() ? newNotificationEmail.toLowerCase() : undefined } : null
+      if (updated) sessionStorage.setItem('user_profile', JSON.stringify(updated))
+      return updated
+    })
     return { success: true }
   }
 
@@ -305,6 +345,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
+    sessionStorage.removeItem('user_profile')
     await supabase.auth.signOut()
     setUser(null)
   }
@@ -343,7 +384,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // User is now aal2 verified, we can set them in context if needed
     if (data.user) {
        const profile = await fetchUserProfile(data.user.id)
-       if (profile) setUser(profile)
+       if (profile) {
+         setUser(profile)
+         sessionStorage.setItem('user_profile', JSON.stringify(profile))
+       }
     }
     
     return { success: true }

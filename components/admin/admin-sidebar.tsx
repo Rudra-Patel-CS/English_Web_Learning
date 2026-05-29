@@ -79,8 +79,8 @@ export function AdminSidebar({
     }
   }, [mobileOpen])
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     window.location.href = '/'
   }
 

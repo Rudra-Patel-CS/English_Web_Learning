@@ -144,13 +144,13 @@ export default function ManageQuestionsPage() {
   }, [])
 
   useEffect(() => {
-    if (selectedStandard && selectedInstruction && hasUnits) {
+    if (selectedStandard) {
       fetchUnits()
     } else {
       setUnits([])
       setSelectedUnit('')
     }
-  }, [selectedStandard, selectedInstruction])
+  }, [selectedStandard])
 
   useEffect(() => {
     if (selectedStandard && selectedInstruction) {
@@ -421,21 +421,20 @@ export default function ManageQuestionsPage() {
   }
 
   const fetchUnits = async () => {
-    if (!selectedStandard || !selectedInstruction) return
+    if (!selectedStandard) return
     setLoading(true)
     try {
-      const standardValue = selectedStandard?.grade_number?.toString() || selectedStandard?.name || ''
       const { data, error } = await supabase
-        .from('question_units')
-        .select('id, unit_name')
-        .eq('standard', standardValue)
-        .eq('instruction_type', selectedInstruction)
-        .order('unit_name', { ascending: true })
+        .from('units')
+        .select('id, name, unit_number')
+        .eq('standard_id', selectedStandard.id)
+        .order('unit_number', { ascending: true })
 
       if (error) throw error
       const mappedUnits = (data || []).map((unit: any) => ({
         id: unit.id,
-        name: unit.unit_name,
+        name: unit.name,
+        unit_number: unit.unit_number,
       }))
       setUnits(mappedUnits)
     } catch (error) {
@@ -486,7 +485,25 @@ export default function ManageQuestionsPage() {
         .eq('instruction_type', selectedInstruction)
 
       if (hasUnits && selectedUnit) {
-        query = query.eq('unit_id', selectedUnit)
+        const unitObj = units.find((u) => u.id === selectedUnit)
+        if (unitObj) {
+          const { data: quData } = await supabase
+            .from('question_units')
+            .select('id')
+            .eq('standard', standardValue)
+            .eq('instruction_type', selectedInstruction)
+            .eq('unit_name', unitObj.name)
+            .maybeSingle()
+
+          if (quData) {
+            query = query.eq('unit_id', quData.id)
+          } else {
+            // No matching question_units entry, so no questions exist yet
+            setQuestions([])
+            setLoading(false)
+            return
+          }
+        }
       }
 
       const { data, error } = await query.order('created_at', { ascending: false })
@@ -715,7 +732,7 @@ ${sub.question.trim()}`,
                       <SelectContent>
                         {units.map(unit => (
                           <SelectItem key={unit.id} value={unit.id}>
-                            {unit.name}
+                            {unit.unit_number ? `${unit.unit_number}. ` : ''}{unit.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

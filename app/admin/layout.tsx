@@ -17,7 +17,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     if (!isLoading && !user) {
       router.push('/signin')
     } else if (!isLoading && user?.role !== 'admin') {
-      router.push('/dashboard')
+      router.push('/student')
     }
   }, [user, isLoading, router])
 
